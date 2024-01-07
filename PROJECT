@@ -1,0 +1,157 @@
+using System;
+using System.IO;
+
+namespace CP_PROJECT_FINALE
+{
+    internal class Program
+    {
+        static void Main()
+        {
+         
+            Console.Write("Enter File location: ");
+            string fileLocation = Console.ReadLine();
+            Console.Clear();
+
+            Console.WriteLine("=======================================");
+            Console.WriteLine("|        Welcome to the ATM       |");
+            Console.WriteLine("=======================================");
+
+            while (true)
+            {
+                try
+                {
+                    Console.Write("\nEnter your 4-digit PIN or type 'exit' to exit: ");
+                    string enteredPin = Console.ReadLine();
+
+                    if (enteredPin == "0000")
+                    {
+                        Console.WriteLine("\nPIN accepted. Choose an option:");
+                        Console.WriteLine("1. Check Balance");
+                        Console.WriteLine("2. Withdraw Cash");
+                        Console.WriteLine("3. Exit");
+
+                        int option;
+                        if (int.TryParse(Console.ReadLine(), out option))
+                        {
+                            switch (option)
+                            {
+                                case 1:
+                                    CheckBalance(fileLocation);
+                                    break;
+                                case 2:
+                                    WithdrawCash(fileLocation);
+                                    break;
+                                case 3:
+                                    Console.WriteLine("\nExiting ATM. Thank you!");
+                                    return;
+                                default:
+                                    Console.WriteLine("Invalid option. Please try again or type 'exit' to exit the application");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid option. Please enter a valid number or type 'exit' to exit the application");
+                        }
+                    }
+                    else if (enteredPin.ToLower() == "exit")
+                    {
+                        Console.WriteLine("\nExiting the application. Thank you!");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid PIN. Please try again or type 'exit' to exit the application");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\nAn error occurred: {ex.Message}");
+                }
+            }
+        }
+
+        static void CheckBalance(string fileLocation)
+        {
+            try
+            {
+                double balance = ReadBalanceFromFile(fileLocation);
+                Console.WriteLine($"\nYour current balance is: ${balance}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nAn error occurred while checking balance: {ex.Message}");
+            }
+        }
+
+        static void WithdrawCash(string fileLocation)
+        {
+            try
+            {
+                double balance = ReadBalanceFromFile(fileLocation);
+
+                Console.Write("\nEnter the amount to withdraw: $");
+                double amountToWithdraw = Convert.ToDouble(Console.ReadLine());
+
+                if (amountToWithdraw > balance)
+                {
+                    Console.WriteLine("\nInsufficient funds. Withdrawal canceled.");
+                }
+                else
+                {
+                    balance -= amountToWithdraw;
+                    WriteBalanceToFile(fileLocation, balance);
+                    Console.WriteLine($"\nYou have successfully withdrawn ${amountToWithdraw}. Remaining balance: ${balance}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nAn error occurred while withdrawing cash: {ex.Message}");
+            }
+        }
+
+        static double ReadBalanceFromFile(string fileLocation)
+        {
+            try
+            {
+                if (File.Exists(fileLocation))
+                {
+                    string[] lines = File.ReadAllLines(fileLocation);
+
+                    if (lines.Length > 0)
+                    {
+                        if (double.TryParse(lines[0], out double balance))
+                        {
+                            return balance;
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nAn error occurred while reading balance from file: {ex.Message}");
+                return 0;
+            }
+        }
+
+        static void WriteBalanceToFile(string fileLocation, double balance)
+        {
+            try
+            {
+                if (File.Exists(fileLocation))
+                {
+                    File.WriteAllText(fileLocation, balance.ToString());
+                }
+                else
+                {
+                    Console.WriteLine("\nError: Balance file not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nAn error occurred while writing balance to file: {ex.Message}");
+            }
+        }
+    }
+}
